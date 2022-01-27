@@ -20,7 +20,24 @@ def show_survey():
      instruction=survey.instructions)
 
 @app.post('/begin')
-def show_question():
+def survey_start():
+    """redirects to beginning of questions in survey"""
+    return redirect('/question/0')
 
-    return render_template('question.html', question = survey.questions[0])
+@app.get('/question/<int:question_number>')
+def show_question(question_number):
+    """displays question in survey based on question_number"""
+
+    return render_template('question.html', question = survey.questions[question_number])
+
+
+@app.post('/answer')
+def submit_answer():
+    question_number = request.referrer.partition('question/')[2]
+    question_number = int(question_number) + 1
+    # print(question_number)
+    # breakpoint()
+    response.append(request.args.get("answer"))
+
+    return redirect(f'/question/{question_number}')
 
