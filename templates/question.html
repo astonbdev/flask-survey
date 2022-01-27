@@ -7,11 +7,13 @@
 
       <!-- you should have one item like this for every choice -->
       <p>
+        {% for choice in question.choices %}
         <input
             type="radio"
             name="answer"
-            value="value-goes-here">
-        choice-goes-here
+            value="{{ choice }}">
+          <label>{{ choice }}</label>
+        {% endfor %}
       </p>
 
     <button>Continue</button>
