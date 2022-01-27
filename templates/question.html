@@ -7,6 +7,7 @@
 
       <!-- you should have one item like this for every choice -->
       <p>
+        <input type="hidden" value="{{ question_number }}" name="question_number">
         {% for choice in question.choices %}
         <input
             type="radio"

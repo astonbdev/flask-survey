@@ -1,4 +1,3 @@
-from dis import Instruction
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import satisfaction_survey as survey
@@ -9,7 +8,7 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-response = []
+survey_answers = []
 
 
 @app.get('/')
@@ -32,21 +31,24 @@ def survey_start():
 def show_question(question_number):
     """displays question in survey based on question_number"""
 
-    return render_template('question.html', question=survey.questions[question_number])
+    return render_template('question.html',
+     question=survey.questions[question_number],
+     question_number = question_number
+    )
 
 
 @app.post('/answer')
 def submit_answer():
-    """this function extract question number from referrer URL,
+    """this function extract question number and answer from request body,
     append answer to the response list and 
     redirect to the next question or completion page
     """
 
-    question_number = request.referrer.partition('question/')[2]
+    question_number = request.form.get('question_number')
     question_number = int(question_number) + 1
     # print(question_number)
     # breakpoint()
-    response.append(request.form.get("answer"))
+    survey_answers.append(request.form.get("answer"))
 
     if len(survey.questions) > question_number:
         return redirect(f'/question/{question_number}')
