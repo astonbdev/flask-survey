@@ -32,13 +32,17 @@ def show_question(question_number):
     """displays question in survey based on question_number, 
     handling redirects if finished or not current question"""
 
+    # is the user manually accessing question
     # redirect if survey finished
     if len(session["survey_answers"]) == len(survey.questions):
+        flash("Survey completed!")
         return redirect("/completion")
 
+    # is the user manually acessing question
     # redirect to current question
     if len(session["survey_answers"]) != question_number:
         #breakpoint()
+        flash("Questions must be answer in order!")
         return redirect(f"/question/{len(session['survey_answers'])}")
 
     return render_template('question.html',
@@ -65,6 +69,8 @@ def submit_answer():
     session["survey_answers"] = answers
     #breakpoint()
 
+    # this is to test whether or not the survey has been completed
+    # are we done in the correct way?
     if len(survey.questions) > question_number:
         return redirect(f'/question/{question_number}')
     else:
