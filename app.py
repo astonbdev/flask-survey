@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
-from surveys import satisfaction_survey as survey
+from surveys import surveys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "never-tell!"
@@ -10,19 +10,31 @@ debug = DebugToolbarExtension(app)
 # global variable for string name for session
 answer_keyname = 'survey_answers'
 
+SURVEY = []
+
+
 @app.get('/')
 def show_survey():
     """this function display the start of the survey"""
+    
 
-
-    return render_template("survey_start.html",
-                           title=survey.title,
-                           instruction=survey.instructions)
+    return render_template("survey_select.html",
+                           surveys = surveys)
 
 
 @app.post('/begin')
 def survey_start():
     """redirects to beginning of questions in survey"""
+    #breakpoint()
+    survey_code = request.form["survey_id"]
+    #breakpoint()
+    #This is an interesting bit, look here: https://stackoverflow.com/questions/929777/why-does-assigning-to-my-global-variables-not-work-in-python
+    global SURVEY
+    SURVEY = surveys[survey_code]
+
+    print("SURVEY:", SURVEY)
+    print(SURVEY.title)
+    print(SURVEY.instructions)
 
     session[answer_keyname] = []
     return redirect('/question/0')
@@ -32,10 +44,12 @@ def survey_start():
 def show_question(question_number):
     """displays question in survey based on question_number, 
     handling redirects if finished or not current question"""
+    #print(SURVEY.title)
+    #breakpoint()
 
     # is the user manually accessing question
     # redirect if survey finished
-    if len(session[answer_keyname]) == len(survey.questions):
+    if len(session[answer_keyname]) == len(SURVEY.questions):
         flash("Survey completed!")
         return redirect("/completion")
 
@@ -47,7 +61,7 @@ def show_question(question_number):
         return redirect(f"/question/{len(session[answer_keyname])}")
 
     return render_template('question.html',
-                           question=survey.questions[question_number],
+                           question=SURVEY.questions[question_number],
                            question_number=question_number
                            )
 
@@ -72,7 +86,7 @@ def submit_answer():
 
     # this is to test whether or not the survey has been completed
     # are we done in the correct way?
-    if len(survey.questions) > question_number:
+    if len(SURVEY.questions) > question_number:
         return redirect(f'/question/{question_number}')
     else:
         return redirect('/completion')

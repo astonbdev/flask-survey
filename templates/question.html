@@ -16,6 +16,11 @@
     <input type="radio" name="answer" value="{{ choice }}">
     <label>{{ choice }}</label>
     {% endfor %}
+    <br><br>
+    {% if question.allow_text == True %}
+    <label>Comments:</label>
+    <input name="comments">
+    {% endif %}
   </p>
 
   <button>Continue</button>
