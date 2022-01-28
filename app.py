@@ -7,13 +7,13 @@ app.config['SECRET_KEY'] = "never-tell!"
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
-
+# global variable for string name for session
+answer_keyname = 'survey_answers'
 
 @app.get('/')
 def show_survey():
     """this function display the start of the survey"""
 
-    session["survey_answers"] = []
 
     return render_template("survey_start.html",
                            title=survey.title,
@@ -24,6 +24,7 @@ def show_survey():
 def survey_start():
     """redirects to beginning of questions in survey"""
 
+    session[answer_keyname] = []
     return redirect('/question/0')
 
 
@@ -34,16 +35,16 @@ def show_question(question_number):
 
     # is the user manually accessing question
     # redirect if survey finished
-    if len(session["survey_answers"]) == len(survey.questions):
+    if len(session[answer_keyname]) == len(survey.questions):
         flash("Survey completed!")
         return redirect("/completion")
 
     # is the user manually acessing question
     # redirect to current question
-    if len(session["survey_answers"]) != question_number:
+    if len(session[answer_keyname]) != question_number:
         #breakpoint()
         flash("Questions must be answer in order!")
-        return redirect(f"/question/{len(session['survey_answers'])}")
+        return redirect(f"/question/{len(session[answer_keyname])}")
 
     return render_template('question.html',
                            question=survey.questions[question_number],
@@ -58,15 +59,15 @@ def submit_answer():
     redirect to the next question or completion page
     """
 
-    question_number = request.form.get('question_number')
+    question_number = request.form['question_number']
     question_number = int(question_number) + 1
     # print(question_number)
     # breakpoint()
-    # survey_answers.append(request.form.get("answer"))
-    #session["survey_answers"].append(request.form.get("answer"))
-    answers = session["survey_answers"]
+    #answer_keyname append(request.form.get("answer"))
+    #session[answer_keyname].append(request.form.get("answer"))
+    answers = session[answer_keyname]
     answers.append(request.form.get("answer"))
-    session["survey_answers"] = answers
+    session[answer_keyname] = answers
     #breakpoint()
 
     # this is to test whether or not the survey has been completed
