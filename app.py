@@ -8,12 +8,12 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-survey_answers = []
-
 
 @app.get('/')
 def show_survey():
     """this function display the start of the survey"""
+
+    session["survey_answers"] = []
 
     return render_template("survey_start.html",
                            title=survey.title,
@@ -29,12 +29,22 @@ def survey_start():
 
 @app.get('/question/<int:question_number>')
 def show_question(question_number):
-    """displays question in survey based on question_number"""
+    """displays question in survey based on question_number, 
+    handling redirects if finished or not current question"""
+
+    # redirect if survey finished
+    if len(session["survey_answers"]) == len(survey.questions):
+        return redirect("/completion")
+
+    # redirect to current question
+    if len(session["survey_answers"]) != question_number:
+        #breakpoint()
+        return redirect(f"/question/{len(session['survey_answers'])}")
 
     return render_template('question.html',
-     question=survey.questions[question_number],
-     question_number = question_number
-    )
+                           question=survey.questions[question_number],
+                           question_number=question_number
+                           )
 
 
 @app.post('/answer')
@@ -48,7 +58,12 @@ def submit_answer():
     question_number = int(question_number) + 1
     # print(question_number)
     # breakpoint()
-    survey_answers.append(request.form.get("answer"))
+    # survey_answers.append(request.form.get("answer"))
+    #session["survey_answers"].append(request.form.get("answer"))
+    answers = session["survey_answers"]
+    answers.append(request.form.get("answer"))
+    session["survey_answers"] = answers
+    #breakpoint()
 
     if len(survey.questions) > question_number:
         return redirect(f'/question/{question_number}')
